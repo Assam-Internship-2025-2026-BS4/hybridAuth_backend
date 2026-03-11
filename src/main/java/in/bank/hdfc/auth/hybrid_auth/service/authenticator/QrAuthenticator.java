@@ -1,4 +1,4 @@
-package in.bank.hdfc.auth.hybrid_auth.service.Authenticator;
+package in.bank.hdfc.auth.hybrid_auth.service.authenticator;
 
 import in.bank.hdfc.auth.hybrid_auth.entities.AuthType;
 import in.bank.hdfc.auth.hybrid_auth.service.qr.QrService;

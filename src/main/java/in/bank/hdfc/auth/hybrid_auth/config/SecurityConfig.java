@@ -1,7 +1,7 @@
 package in.bank.hdfc.auth.hybrid_auth.config;
 
-import in.bank.hdfc.auth.hybrid_auth.security.JwtAuthenticationFilter;
-import jakarta.servlet.http.HttpServletResponse;
+import java.util.List;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -16,7 +16,8 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.List;
+import in.bank.hdfc.auth.hybrid_auth.security.JwtAuthenticationFilter;
+import jakarta.servlet.http.HttpServletResponse;
 
 @Configuration
 @EnableWebSecurity
@@ -30,10 +31,9 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) {
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         http
-
                 .csrf(AbstractHttpConfigurer::disable)
 
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -75,23 +75,20 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
 
-                        /* CORS */
+                        /* CORS preflight */
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-
-                        /* PUBLIC */
+                        /* PUBLIC APIs */
                         .requestMatchers(HttpMethod.POST,
                                 "/api/v1/auth/init",
-                                "/api/v1/auth/app-login"
+                                "/api/v1/auth/app-login",
+                                "/api/v1/auth/session/init",
+                                "/api/v1/user/details/identify"
                         ).permitAll()
 
                         .requestMatchers("/health", "/actuator/**").permitAll()
-                        /* PRE AUTH (WEB LOGIN FLOW) */
-                        .requestMatchers(HttpMethod.POST,
-                                "/api/v1/auth/session/init",
-                                "/api/v1/user/details/identify"
-                        ).hasAuthority("PRE_AUTH")
 
+                        /* PRE AUTH (WEB LOGIN FLOW) */
                         .requestMatchers(
                                 "/api/v1/auth/session/fetch",
                                 "/api/v1/auth/otp/**",
@@ -114,53 +111,46 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
 
-
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
-//    @Bean
-//    CorsConfigurationSource corsConfigurationSource() {
-//
-//        CorsConfiguration config = new CorsConfiguration();
-//
-//        config.setAllowedOriginPatterns(List.of("*"));
-//        config.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS"));
-//        config.setExposedHeaders(List.of("Authorization"));
-//        config.setAllowedHeaders(List.of("*"));
-//
-//        config.setAllowCredentials(true);
-//
-//        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-//        source.registerCorsConfiguration("/**", config);
-//
-//        return source;
-//    }
-@Bean
-CorsConfigurationSource corsConfigurationSource() {
 
-    CorsConfiguration config = new CorsConfiguration();
+    @Bean
+    CorsConfigurationSource corsConfigurationSource() {
 
-    config.setAllowedOriginPatterns(List.of("*"));
+        CorsConfiguration config = new CorsConfiguration();
 
-    config.setAllowedMethods(List.of(
-            "GET", "POST", "PUT", "DELETE", "OPTIONS"
-    ));
+        config.setAllowedOrigins(List.of(
+                "http://localhost:57200",
+                "http://hybrid-auth-frontend.s3-website.ap-south-1.amazonaws.com"
+        ));
 
-    config.setAllowedHeaders(List.of("*"));
+        config.setAllowedMethods(List.of(
+                "GET",
+                "POST",
+                "PUT",
+                "DELETE",
+                "OPTIONS"
+        ));
 
-    config.setExposedHeaders(List.of("Authorization"));
+        config.setAllowedHeaders(List.of("*"));
 
-    config.setAllowCredentials(true);
+        config.setExposedHeaders(List.of(
+                "Authorization",
+                "Content-Type"
+        ));
 
-    config.setMaxAge(3600L);
+        config.setAllowCredentials(true);
 
-    UrlBasedCorsConfigurationSource source =
-            new UrlBasedCorsConfigurationSource();
+        config.setMaxAge(3600L);
 
-    source.registerCorsConfiguration("/**", config);
+        UrlBasedCorsConfigurationSource source =
+                new UrlBasedCorsConfigurationSource();
 
-    return source;
-}
+        source.registerCorsConfiguration("/**", config);
+
+        return source;
+    }
 }

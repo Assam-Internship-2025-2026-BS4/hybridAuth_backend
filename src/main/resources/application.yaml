@@ -62,9 +62,9 @@ spring:
     name: hybrid-auth
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/hybrid_auth
-    username: hybrid_user
-    password: admin
+    url: jdbc:postgresql://database-1.ctmgmg48iehy.us-east-1.rds.amazonaws.com:5432/postgres?sslmode=require
+    username: postgres
+    password: postgres123
     hikari:
       maximum-pool-size: 10
       minimum-idle: 2

@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hybrid-auth-backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: hybrid-auth
+  template:
+    metadata:
+      labels:
+        app: hybrid-auth
+    spec:
+      containers:
+      - name: hybrid-auth
+        image: abhisekhmallah/hybrid-auth-backend:latest
+        ports:
+        - containerPort: 8083
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: hybrid-auth-service
+spec:
+  selector:
+    app: hybrid-auth
+  ports:
+    - port: 80
+      targetPort: 8083
+  type: LoadBalancer

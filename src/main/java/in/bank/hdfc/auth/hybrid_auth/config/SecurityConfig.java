@@ -31,9 +31,10 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http) {
 
         http
+
                 .csrf(AbstractHttpConfigurer::disable)
 
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -75,20 +76,23 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
 
-                        /* CORS preflight */
+                        /* CORS */
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                        /* PUBLIC APIs */
+
+                        /* PUBLIC */
                         .requestMatchers(HttpMethod.POST,
                                 "/api/v1/auth/init",
-                                "/api/v1/auth/app-login",
-                                "/api/v1/auth/session/init",
-                                "/api/v1/user/details/identify"
+                                "/api/v1/auth/app-login"
                         ).permitAll()
 
                         .requestMatchers("/health", "/actuator/**").permitAll()
-
                         /* PRE AUTH (WEB LOGIN FLOW) */
+                        .requestMatchers(HttpMethod.POST,
+                                "/api/v1/auth/session/init",
+                                "/api/v1/user/details/identify"
+                        ).hasAuthority("PRE_AUTH")
+
                         .requestMatchers(
                                 "/api/v1/auth/session/fetch",
                                 "/api/v1/auth/otp/**",
@@ -111,46 +115,53 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
 
+
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
+//    @Bean
+//    CorsConfigurationSource corsConfigurationSource() {
+//
+//        CorsConfiguration config = new CorsConfiguration();
+//
+//        config.setAllowedOriginPatterns(List.of("*"));
+//        config.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS"));
+//        config.setExposedHeaders(List.of("Authorization"));
+//        config.setAllowedHeaders(List.of("*"));
+//
+//        config.setAllowCredentials(true);
+//
+//        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+//        source.registerCorsConfiguration("/**", config);
+//
+//        return source;
+//    }
+@Bean
+CorsConfigurationSource corsConfigurationSource() {
 
-    @Bean
-    CorsConfigurationSource corsConfigurationSource() {
+    CorsConfiguration config = new CorsConfiguration();
 
-        CorsConfiguration config = new CorsConfiguration();
+    config.setAllowedOriginPatterns(List.of("*"));
 
-        config.setAllowedOrigins(List.of(
-                "http://localhost:57200",
-                "http://hybrid-auth-frontend.s3-website.ap-south-1.amazonaws.com"
-        ));
+    config.setAllowedMethods(List.of(
+            "GET", "POST", "PUT", "DELETE", "OPTIONS"
+    ));
 
-        config.setAllowedMethods(List.of(
-                "GET",
-                "POST",
-                "PUT",
-                "DELETE",
-                "OPTIONS"
-        ));
+    config.setAllowedHeaders(List.of("*"));
 
-        config.setAllowedHeaders(List.of("*"));
+    config.setExposedHeaders(List.of("Authorization"));
 
-        config.setExposedHeaders(List.of(
-                "Authorization",
-                "Content-Type"
-        ));
+    config.setAllowCredentials(true);
 
-        config.setAllowCredentials(true);
+    config.setMaxAge(3600L);
 
-        config.setMaxAge(3600L);
+    UrlBasedCorsConfigurationSource source =
+            new UrlBasedCorsConfigurationSource();
 
-        UrlBasedCorsConfigurationSource source =
-                new UrlBasedCorsConfigurationSource();
+    source.registerCorsConfiguration("/**", config);
 
-        source.registerCorsConfiguration("/**", config);
-
-        return source;
-    }
+    return source;
+}
 }

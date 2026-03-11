@@ -1,0 +1,105 @@
+#spring:
+#  application:
+#    name: hybrid-auth
+#
+#  datasource:
+#    url: jdbc:postgresql://database-1.ctmgmg48iehy.us-east-1.rds.amazonaws.com:5432/postgres?sslmode=require
+#    username: postgres
+#    password: postgres123
+#    driver-class-name: org.postgresql.Driver
+#    hikari:
+#      maximum-pool-size: 10
+#      minimum-idle: 2
+#      idle-timeout: 30000
+#      connection-timeout: 20000
+#      pool-name: HybridAuthHikariCP
+#      keepalive-time: 60000
+#      max-lifetime: 1200000
+#
+#  jpa:
+#    hibernate:
+#      ddl-auto: update
+#    show-sql: true
+#    properties:
+#      hibernate:
+#        dialect: org.hibernate.dialect.PostgreSQLDialect
+#        format_sql: true
+#        jdbc:
+#          time_zone: UTC
+#
+#  jackson:
+#    time-zone: UTC
+#
+#server:
+#  port: 8083
+#
+#jwt:
+#  issuer: hybrid-auth
+#  pre-auth-ttl: 1800
+#  user-auth-ttl: 900
+#  refresh-ttl: 2592000
+#
+#auth:
+#  session:
+#    ttl:
+#      WHATSAPP: 120
+#      QR: 180
+#      OTP: 300
+#
+#logging:
+#  level:
+#    org.springframework.security: DEBUG
+#    io.jsonwebtoken: DEBUG
+#    org.hibernate.SQL: DEBUG
+#    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+#    com.zaxxer.hikari: INFO
+
+
+
+
+spring:
+  application:
+    name: hybrid-auth
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/hybrid_auth
+    username: hybrid_user
+    password: admin
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      idle-timeout: 30000
+      connection-timeout: 20000
+      pool-name: HybridAuthHikariCP
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  jackson:
+    time-zone: UTC
+
+server:
+  port: 8083
+
+jwt:
+  issuer: hybrid-auth
+  pre-auth-ttl: 1800
+  user-auth-ttl: 900
+  refresh-ttl: 2592000
+
+auth:
+  session:
+    ttl:
+      WHATSAPP: 120
+      QR: 180
+      OTP: 300
+
+logging:
+  level:
+    org.springframework.security: DEBUG
+    io.jsonwebtoken: DEBUG
